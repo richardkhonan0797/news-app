@@ -21,6 +21,7 @@ psycopg2 = "*"
 psycopg2-binary = "*"
 schedule = "*"
 flask-testing = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.8"

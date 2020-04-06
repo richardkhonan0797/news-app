@@ -24,8 +24,8 @@ def create_app(config_name):
     from .users import usersApp
     from .news import news_app
 
-    app.register_blueprint(usersApp)
-    app.register_blueprint(news_app)
+    app.register_blueprint(usersApp, url_prefix='/users')
+    app.register_blueprint(news_app, url_prefix='/news')
 
     @app.before_first_request
     def create_tables():

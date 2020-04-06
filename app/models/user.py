@@ -1,4 +1,6 @@
 import re
+import hashlib
+import random
 
 from requests import Response, post
 from flask import request, url_for
@@ -21,6 +23,10 @@ class UserModel(db.Model):
     password = db.Column(db.String(40), nullable = False)
     email = db.Column(db.String(40), nullable = False, unique = True)
     activated = db.Column(db.Boolean, default = False)
+    hash_val = db.Column(
+        db.String(32), 
+        default = hashlib.md5(str(random.randint(1,100)).encode()).hexdigest()
+    )
 
     @classmethod
     def find_by_username(cls, username):
@@ -31,11 +37,15 @@ class UserModel(db.Model):
         return cls.query.filter_by(id=id).first()
 
     @classmethod
+    def find_by_hash_val(cls, hash_val):
+        return cls.query.filter_by(hash_val=hash_val).first()
+
+    @classmethod
     def find_by_email(cls, email):
         return cls.query.filter_by(email=email).first()
 
     def send_confirmation_email(self):
-        link = request.url_root[:-1] + url_for("users.userconfirm", user_id=self.id)
+        link = request.url_root[:-1] + url_for("users.userconfirm", hash_val=self.hash_val)
         print(link, 'INI LINK')
 
         return post(
@@ -50,6 +60,7 @@ class UserModel(db.Model):
         )
 
     def save_to_db(self):
+        print(self)
         print('Masuk save')
         db.session.add(self)
         db.session.commit()

@@ -29,7 +29,7 @@ FAILED_TO_CREATE = 'Internal Server Error'
 class UserRegister(Resource):
     def post(self):
         user_json = request.get_json()
-        print(user_json)
+        print(user_json, "INI USER")
         if UserModel.find_by_username(user_json["username"]):
             return {'message': USERNAME_EXISTS}, 400
         
@@ -67,8 +67,8 @@ class UserLogin(Resource):
         return {'message': INVALID_CREDENTIALS}, 401
 
 class UserConfirm(Resource):
-    def get(self, user_id):
-        user = UserModel.find_by_id(user_id)
+    def get(self, hash_val):
+        user = UserModel.find_by_hash_val(hash_val)
         
         if user:
             user.activated = True
