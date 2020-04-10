@@ -104,8 +104,8 @@ python run.py
 * Request Body
     ```JSON
     {
-        "username" = "username",
-        "password" = "password"
+        "username": "username",
+        "password": "password"
     }
     ```
 
