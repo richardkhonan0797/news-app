@@ -1,13 +1,16 @@
 import pytest
 import json
 
-from .. import create_app, db
+from .. import db
+from . import flask_app
 from ..models.user import UserModel
 from ..models.news import NewsModel
+from ..schemas.user import UserSchema
+
+user_schema = UserSchema()
 
 @pytest.fixture(scope='module')
 def test_client():
-    flask_app = create_app('test')
     testing_client = flask_app.test_client()
     ctx = flask_app.app_context()
     ctx.push()
@@ -38,7 +41,10 @@ def test_client():
     ctx.pop()
 
 def test_news(test_client):
-    test_client.get('/users/confirm/1')
+    user = UserModel.find_by_id('1')
+    u_data = user_schema.dump(user)
+    hash_val = u_data['hash_val']
+    test_client.get('/users/confirm/{}'.format(hash_val))
     user = test_client.post(
             '/users/login',
             data = json.dumps(dict(username='richard', password='123123')),

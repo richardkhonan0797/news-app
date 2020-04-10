@@ -1,88 +1,26 @@
-# import os
-# import unittest
-# import tempfile
-# import json
-
-# from flask import Flask
-# from sqlalchemy import create_engine
-# from sqlalchemy.orm import sessionmaker
-
-# from .. import create_app, db, app
-# from ..users.resources.user import UserRegister, UserLogin, UserConfirm, UserLogout
-# from ..models.user import UserModel
-# from ..users import usersApp
-
-# class TestCase(unittest.TestCase):
-
-#     def setUp(self):
-#         app = create_app('test')
-#         self.client = app.test_client()
-#         with app.app_context():
-#             db.drop_all()
-#             db.create_all()
-
-#     def register(self, username, email, password):
-#         return self.client.post(
-#             '/users/register',
-#             data=json.dumps(dict(username= username, email= email, password= password)),
-#             content_type='application/json'
-#         )
-
-#     def login(self, username, password):
-#         return self.client.post(
-#             '/users/login',
-#             data=json.dumps(dict(username=username, password=password)),
-#             content_type='application/json'
-#         )
-
-#     def confirm(self):
-#         return self.client.get(
-#             '/users/confirm/1',
-#         )
-
-#     def test_user_register(self):
-#         response = self.register('richard', 'richardkhonan0797@gmail.com', '123123')
-#         self.assertEqual(response.status_code, 201)
-#         self.assertIn(b'Account created successfully, a confirmation link has been sent to your email.', response.data)
-
-#         # response = self.login('richard', '123123')
-#         # self.assertEqual(response.status_code, 400)
-#         # self.assertIn(b'You have not activated your account, please check your email <richardkhonan0797@gmail.com>.', response.data)
-
-#     def test_user_confirm(self):
-#         response = self.confirm()
-#         self.assertEqual(response.status_code, 200)
-
-#     def test_fail_login(self):
-#         response = self.login('richard', '123123')
-#         print(response.data)
-#         self.assertEqual(response.status_code, 400)
-#         self.assertIn(b'You have not activated your account, please check your email <{richardkhonan0797@gmail.com}>.', response.data)
-
-#     def tearDown(self):
-#         pass
-
-
-# suite = unittest.TestLoader().loadTestsFromTestCase(TestCase)
-# unittest.TextTestRunner(verbosity=2).run(suite)
-
 import pytest
 import json
-from .. import db, create_app
+from . import flask_app
+from .. import db
+from ..models.user import UserModel
+from ..schemas.user import UserSchema
+
+user_schema = UserSchema()
 
 @pytest.fixture(scope='module')
 def test_client():
-    flask_app = create_app('test')
     testing_client = flask_app.test_client()
     ctx = flask_app.app_context()
     ctx.push()
+    db.drop_all()
+    db.create_all()
     yield testing_client
     ctx.pop()
 
-@pytest.fixture(scope='module')
-def init_database():
-    db.create_all()
-    yield db 
+# @pytest.fixture(scope='module')
+# def init_database():
+#     db.create_all()
+#     yield db 
 
 def test_register(test_client):
     response = test_client.post(
@@ -103,8 +41,11 @@ def test_fail_login(test_client):
     assert b'{"message": "You have not activated your account, please check your email <email@mail.com>."}\n' in response.data
 
 def test_confirm(test_client):
+    user = UserModel.find_by_id('1')
+    user_data = user_schema.dump(user)
+    hash_val = user_data['hash_val']
     response = test_client.get(
-        '/users/confirm/1'
+        '/users/confirm/{}'.format(hash_val)
     )
     assert response.status_code == 200
 
@@ -116,6 +57,6 @@ def test_login(test_client):
     )
     data = json.loads(response.data) 
     assert response.status_code == 200
-    assert data["access_token"] is not ""
-    assert data["refresh_token"] is not ""
+    assert data["access_token"] != ""
+    assert data["refresh_token"] != ""
     db.drop_all()

@@ -45,7 +45,7 @@ class UserRegister(Resource):
             except:
                 return {'message': FAILED_TO_CREATE}, 500
         else:
-            return {'message': 'Please input a valid email address.'}
+            return {'message': 'Please input a valid email address.'}, 400
 
 class UserLogin(Resource):
     def post(self):
