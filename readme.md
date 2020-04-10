@@ -58,8 +58,8 @@ python run.py
 * Request Body
     ```JSON
     {
-        "username" = "username",
-        "password" = "password"
+        "username": "username",
+        "password": "password"
     }
     ```
 
@@ -143,7 +143,7 @@ python run.py
 
 * Header
     ```JSON
-    {'Content-Type': 'text/html'}
+    {"Content-Type": "text/html"}
     ```
 
 * Success Response
@@ -189,7 +189,7 @@ python run.py
 
 * Header
     ```JSON
-    {'Authorization': 'Bearer <access_token>'}
+    {"Authorization": "Bearer <access_token>"}
     ```
 
 * Success Response
