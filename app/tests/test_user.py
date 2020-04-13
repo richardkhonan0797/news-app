@@ -17,11 +17,6 @@ def test_client():
     yield testing_client
     ctx.pop()
 
-# @pytest.fixture(scope='module')
-# def init_database():
-#     db.create_all()
-#     yield db 
-
 def test_register(test_client):
     response = test_client.post(
             '/users/register',

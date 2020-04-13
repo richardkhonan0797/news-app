@@ -60,7 +60,6 @@ def test_news(test_client):
         content_type='application/json'
     )
     news_data = json.loads(news.data.decode('utf-8'))
-    print(news_data)
 
     assert news.status_code == 200
     assert news_data[0]['source_id'] == 'test'

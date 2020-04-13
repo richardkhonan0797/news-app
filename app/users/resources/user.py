@@ -14,16 +14,18 @@ from flask_jwt_extended import (
     get_raw_jwt
 )
 from ... import blacklist
+from ...helpers.email import check
+from ...helpers.usermessage import userMessage
 
 user_schema = UserSchema()
 
-NOT_ACTIVATED = 'You have not activated your account, please check your email <{}>.'
-INVALID_CREDENTIALS = 'You have invalid credentials.'
-USER_NOT_FOUND = 'User not found'
-USERNAME_EXISTS = 'A user with that username already exists.'
-EMAIL_EXISTS = 'A user with that email already exists.'
-CREATED_SUCCESS = 'Account created successfully, a confirmation link has been sent to your email.'
-FAILED_TO_CREATE = 'Internal Server Error'
+# NOT_ACTIVATED = 'You have not activated your account, please check your email <{}>.'
+# INVALID_CREDENTIALS = 'You have invalid credentials.'
+# USER_NOT_FOUND = 'User not found'
+# USERNAME_EXISTS = 'A user with that username already exists.'
+# EMAIL_EXISTS = 'A user with that email already exists.'
+# CREATED_SUCCESS = 'Account created successfully, a confirmation link has been sent to your email.'
+# FAILED_TO_CREATE = 'Internal Server Error'
 
 
 class UserRegister(Resource):
@@ -31,19 +33,19 @@ class UserRegister(Resource):
         user_json = request.get_json()
         print(user_json, "INI USER")
         if UserModel.find_by_username(user_json["username"]):
-            return {'message': USERNAME_EXISTS}, 400
+            return {'message': userMessage.USERNAME_EXISTS}, 400
         
         if UserModel.find_by_email(user_json["email"]):
-            return {'message': EMAIL_EXISTS}, 400
+            return {'message': userMessage.EMAIL_EXISTS}, 400
 
-        if UserModel.check(user_json['email']):
+        if check(user_json['email']):
             user = user_schema.load(user_json)
             try:
                 user.save_to_db()
                 user.send_confirmation_email()
-                return {'message': CREATED_SUCCESS}, 201
+                return {'message': userMessage.CREATED_SUCCESS}, 201
             except:
-                return {'message': FAILED_TO_CREATE}, 500
+                return {'message': userMessage.FAILED_TO_CREATE}, 500
         else:
             return {'message': 'Please input a valid email address.'}, 400
 
@@ -62,9 +64,9 @@ class UserLogin(Resource):
                     'refresh_token': refresh_token
                 }, 200
             else:
-                return {'message': NOT_ACTIVATED.format(user.email)}, 400
+                return {'message': userMessage.NOT_ACTIVATED.format(user.email)}, 400
 
-        return {'message': INVALID_CREDENTIALS}, 401
+        return {'message': userMessage.INVALID_CREDENTIALS}, 401
 
 class UserConfirm(Resource):
     def get(self, hash_val):
@@ -76,7 +78,7 @@ class UserConfirm(Resource):
             headers = {'Content-Type': 'text/html'}
             return make_response(render_template('confirmation_page.html', email=user.email), 200, headers)
         else:
-            return {'message': USER_NOT_FOUND}, 404
+            return {'message': userMessage.USER_NOT_FOUND}, 404
 
 class UserLogout(Resource):
     @jwt_required

@@ -17,7 +17,6 @@ class NewsModel(db.Model):
     category = db.Column(db.String)
 
     def save_all_to_db(objects):
-        print(objects, 'INI OBJECTs')
         db.session.add_all(objects)
         db.session.commit()
 

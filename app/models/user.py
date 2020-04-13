@@ -2,18 +2,13 @@ import re
 import hashlib
 import random
 
-from requests import Response, post
+from requests import Response
 from flask import request, url_for
 from flask_mail import Message
 from .. import db
 from .. import mail
 
-regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
-
-MAILGUN_DOMAIN = 'sandboxa9c6f356584d4d9dbc489688bb8daed6.mailgun.org'
-MAILGUN_API_KEY = 'a34a430233e317fa9c13c2deab584ff3-46ac6b00-1db2e2a5'
-FROM_TITLE = 'News API'
-FROM_EMAIL = 'postmaster@sandboxa9c6f356584d4d9dbc489688bb8daed6.mailgun.org'
+from ..helpers.email import sendEmail
 
 class UserModel(db.Model):
     __tablename__ = 'users'
@@ -46,27 +41,8 @@ class UserModel(db.Model):
 
     def send_confirmation_email(self):
         link = request.url_root[:-1] + url_for("users.userconfirm", hash_val=self.hash_val)
-        print(link, 'INI LINK')
-
-        return post(
-            f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
-            auth=("api", MAILGUN_API_KEY),
-            data={
-                "from": f"{FROM_TITLE} <{FROM_EMAIL}>",
-                "to": self.email,
-                "subject": "Registration confirmation",
-                "text": f"Please click the link to confirm your registration: {link}",
-            },
-        )
+        return sendEmail(link), 200
 
     def save_to_db(self):
-        print(self)
-        print('Masuk save')
         db.session.add(self)
         db.session.commit()
-
-    def check(email):
-        if(re.search(regex, email)):
-            return True
-        else:
-            return False

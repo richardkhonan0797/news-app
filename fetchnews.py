@@ -25,8 +25,6 @@ class News(Base):
     category = Column(String)
 
 
-# metadata.create_all(engine)
-
 newsapi = NewsApiClient(api_key='0d2e9ff8c3b34e0ebc75cdb5646af286')
 
 def query(country, category):

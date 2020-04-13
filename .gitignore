@@ -1,0 +1,8 @@
+.pytest_cache
+.vscode
+.env
+__pycache__
+news-app.db
+test.db
+htmlcov
+.coverage

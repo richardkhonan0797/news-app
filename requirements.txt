@@ -9,7 +9,6 @@ requests
 flask-mail
 newsapi-python
 psutil
-psycopg2
 psycopg2-binary
 schedule
 flask-testing
